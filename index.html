@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conhecer para Proteger | IFAM CMZL</title>
+    
+    <!-- Fonte Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS e Configuração -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            light: '#4ade80', // Verde neon suave
+                            DEFAULT: '#22c55e', // Verde vibrante
+                            dark: '#14532d',
+                        },
+                        dark: {
+                            bg: '#0f172a',    // slate-900
+                            card: '#1e293b',  // slate-800
+                            border: '#334155' // slate-700
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
+    <!-- Seu CSS Separado -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="antialiased selection:bg-brand-DEFAULT selection:text-white">
+
+   <!-- HERO SECTION (Banner Escuro) -->
+    <header class="relative w-full min-h-[65vh] flex flex-col items-center justify-center text-center p-6 overflow-hidden bg-dark-bg">
+        <!-- Background Pattern / Gradient escuro -->
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-dark-card via-dark-bg to-dark-bg z-0"></div>
+        
+        <!-- Malha decorativa sutil -->
+        <div class="absolute inset-0 opacity-10" style="background-image: linear-gradient(#334155 1px, transparent 1px), linear-gradient(90deg, #334155 1px, transparent 1px); background-size: 30px 30px;"></div>
+        
+        <!-- Content -->
+        <div class="relative z-10 max-w-4xl mx-auto space-y-6 mt-12">
+            <span class="inline-flex items-center gap-2 py-1.5 px-4 rounded-full bg-brand-light/10 text-brand-light text-sm font-semibold tracking-widest border border-brand-light/20 uppercase">
+                <span class="w-2 h-2 rounded-full bg-brand-light animate-pulse"></span>
+                Área de Estudo 
+            </span>
+            <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold text-white leading-tight glow-text tracking-tight">
+                Mapeamento e <span class="text-brand-light">Intervenções</span>
+            </h1>
+            <p class="text-lg md:text-xl text-slate-400 font-light max-w-2xl mx-auto">
+                Projeto "Conhecer para Proteger" - Foco exclusivo na zona de pesquisa do IFAM Campus Manaus Zona Leste.
+            </p>
+            <div class="pt-8">
+                <a href="#mapa" class="inline-flex items-center justify-center px-8 py-3.5 text-base font-semibold text-dark-bg bg-brand-light rounded-full shadow-[0_0_15px_rgba(74,222,128,0.5)] hover:bg-white hover:shadow-[0_0_25px_rgba(255,255,255,0.5)] transition-all duration-300">
+                    Acessar Perímetro de Pesquisa
+                    <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+                </a>
+            </div>
+        </div>
+
+        <!-- NOVO BOTÃO ADMIN (Canto Inferior Direito)  -->
+        <div class="absolute bottom-6 right-6 z-20">
+            <a href="admin.html" class="flex items-center gap-2 px-4 py-2 bg-slate-800/60 hover:bg-slate-700 border border-slate-600 rounded-lg text-slate-400 hover:text-white transition-all text-sm backdrop-blur-md shadow-lg group">
+                <svg class="w-4 h-4 text-slate-400 group-hover:text-brand-light transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                Painel Admin
+            </a>
+        </div>
+    </header>
+
+    <!-- SEÇÃO DO MAPA INTERATIVO (A Ilha) -->
+    <section id="mapa" class="w-full bg-dark-bg py-16 border-t border-dark-border">
+        <div class="max-w-6xl mx-auto px-4 md:px-6">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-8">
+                <div>
+                    <h2 class="text-3xl font-bold text-white flex items-center gap-3">
+                        <svg class="w-8 h-8 text-brand-light" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                        Ilha de Pesquisa IFAM-CMZL
+                    </h2>
+                    <p class="text-slate-400 mt-2 text-sm md:text-base">Apenas o perímetro mapeado está iluminado. O restante do mapa foi ofuscado intencionalmente.</p>
+                </div>
+                
+                <!-- Nova Legenda Interativa -->
+                <div class="mt-6 md:mt-0 flex flex-wrap gap-2 text-xs font-medium text-slate-300 bg-dark-card p-3 rounded-xl border border-dark-border" id="botoes-filtro">
+                    <button data-tipo="todos" onclick="filtrarMapa('todos')" class="btn-filtro px-3 py-1.5 rounded bg-slate-700 text-white transition-all border border-slate-500">Todos</button>
+                    
+                    <button data-tipo="red-500" onclick="filtrarMapa('red-500')" class="btn-filtro flex items-center px-2 py-1.5 rounded opacity-60 hover:opacity-100 transition-all border border-transparent hover:bg-slate-700">
+                        <span class="w-3 h-3 rounded-full bg-red-500 mr-2 shadow-[0_0_8px_rgba(239,68,68,0.8)]"></span> Acúmulo de Resíduos
+                    </button>
+                    
+                    <button data-tipo="green-500" onclick="filtrarMapa('green-500')" class="btn-filtro flex items-center px-2 py-1.5 rounded opacity-60 hover:opacity-100 transition-all border border-transparent hover:bg-slate-700">
+                        <span class="w-3 h-3 rounded-full bg-green-500 mr-2 shadow-[0_0_8px_rgba(34,197,94,0.8)]"></span> Corte de Árvores
+                    </button>
+                    
+                    <button data-tipo="yellow-500" onclick="filtrarMapa('yellow-500')" class="btn-filtro flex items-center px-2 py-1.5 rounded opacity-60 hover:opacity-100 transition-all border border-transparent hover:bg-slate-700">
+                        <span class="w-3 h-3 rounded-full bg-yellow-500 mr-2 shadow-[0_0_8px_rgba(234,179,8,0.8)]"></span> Solo Exposto
+                    </button>
+                    
+                    <button data-tipo="blue-500" onclick="filtrarMapa('blue-500')" class="btn-filtro flex items-center px-2 py-1.5 rounded opacity-60 hover:opacity-100 transition-all border border-transparent hover:bg-slate-700">
+                        <span class="w-3 h-3 rounded-full bg-blue-500 mr-2 shadow-[0_0_8px_rgba(59,130,246,0.8)]"></span> Ocupações Irregulares
+                    </button>
+                    
+                    <button data-tipo="purple-500" onclick="filtrarMapa('purple-500')" class="btn-filtro flex items-center px-2 py-1.5 rounded opacity-60 hover:opacity-100 transition-all border border-transparent hover:bg-slate-700">
+                        <span class="w-3 h-3 rounded-full bg-purple-500 mr-2 shadow-[0_0_8px_rgba(168,85,247,0.8)]"></span> Intervenções
+                    </button>
+
+                    <button onclick="filtrarMapa('teal-500')" data-tipo="teal-500" class="btn-filtro px-3 py-1.5 text-xs md:text-sm rounded-full border border-transparent opacity-60 hover:opacity-100 transition-all flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.8)]"></span> APPs
+                    </button>
+
+                    <button onclick="filtrarMapa('orange-500')" data-tipo="orange-500" class="btn-filtro px-3 py-1.5 text-xs md:text-sm rounded-full border border-transparent opacity-60 hover:opacity-100 transition-all flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.8)]"></span> Sítio Arqueológico
+                    </button>
+                </div>
+            </div>
+            
+            <!-- ========================================== -->
+            <!-- MENU DE CAMADAS ANALÍTICAS (QGIS)          -->
+            <!-- ========================================== -->
+            <div class="w-full bg-dark-card border border-dark-border rounded-xl mb-6 overflow-hidden">
+                
+                <!-- Título Clicável (Retrátil) -->
+                <button onclick="toggleMenuCamadas()" class="w-full flex justify-between items-center p-4 hover:bg-slate-800/50 transition-colors">
+                    <h3 class="text-white font-bold flex items-center gap-2 text-sm uppercase tracking-wider">
+                        <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                        Camadas Analíticas (QGIS)
+                    </h3>
+                    <!-- Seta indicativa -->
+                    <svg id="seta-menu-camadas" class="w-5 h-5 text-slate-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </button>
+                
+                   <div id="conteudo-menu-camadas" class="opacity-0 overflow-hidden transition-all duration-500 ease-in-out" style="max-height: 0px;">
+                        <!-- 1. Item da Camada: Hipsometria -->
+                        <!-- (Mantenha o seu código dos botões aqui dentro normalmente) -->
+                    <!-- 1. Item da Camada: Hipsometria -->
+                    <div class="flex flex-col">
+                        <button id="btn-qgis-elevacao" onclick="toggleCamadaQGIS('elevacao', 'mapa_elevacao.png')" class="w-full md:w-[60%] flex justify-between items-center p-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-white font-medium border-2 border-transparent transition-all">
+                            <span class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-blue-500 hidden" id="status-elevacao"></span>
+                                Análise Hipsométrica e Relevo
+                            </span>
+                            <span id="icone-elevacao" class="text-xl">➕</span>
+                        </button>
+                        <div id="legenda-elevacao" class="hidden w-full md:w-[60%] p-4 bg-slate-900 border-x border-b border-slate-700 rounded-b-lg mt-[-5px]">
+                            <h4 class="text-white font-bold text-sm mb-1">Altimetria (Metros)</h4>
+                            <p class="text-xs text-slate-400 mb-3">Modelo Digital de Elevação (SRTM NASA)</p>
+                            <div class="w-full h-3 rounded bg-gradient-to-r from-blue-600 via-green-400 to-red-600"></div>
+                            <div class="flex justify-between text-xs text-slate-300 mt-1 font-bold">
+                                <span>30m</span><span>70m</span><span>110m</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Item da Camada: Áreas Cedidas -->
+                    <div class="flex flex-col">
+                        <button id="btn-qgis-cedidas" onclick="toggleCamadaQGIS('cedidas', 'mapa_cedidas.png')" class="w-full md:w-[60%] flex justify-between items-center p-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-white font-medium border-2 border-transparent transition-all">
+                            <span class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-blue-500 hidden" id="status-cedidas"></span>
+                                Áreas Cedidas e Institucionais
+                            </span>
+                            <span id="icone-cedidas" class="text-xl">➕</span>
+                        </button>
+                        <div id="legenda-cedidas" class="hidden w-full md:w-[60%] p-4 bg-slate-900 border-x border-b border-slate-700 rounded-b-lg mt-[-5px]">
+                            <h4 class="text-white font-bold text-sm mb-3">Situação Fundiária</h4>
+                            <ul class="text-xs text-slate-300 space-y-2">
+                                <li class="flex items-center gap-2"><span class="w-4 h-4 bg-green-400/50 border border-green-500 block relative overflow-hidden"><span class="absolute inset-0" style="background: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(34, 197, 94, 0.5) 2px, rgba(34, 197, 94, 0.5) 4px);"></span></span> Loteamento Armando Mendes: 3,65 ha</li>
+                                <li class="flex items-center gap-2"><span class="w-4 h-4 bg-slate-300/50 border border-slate-400 block relative overflow-hidden"><span class="absolute inset-0" style="background: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(148, 163, 184, 0.5) 2px, rgba(148, 163, 184, 0.5) 4px);"></span></span> PROAMA: 30,64 ha</li>
+                                <li class="flex items-center gap-2"><span class="w-4 h-4 bg-orange-400/50 border border-orange-500 block relative overflow-hidden"><span class="absolute inset-0" style="background: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(249, 115, 22, 0.5) 2px, rgba(249, 115, 22, 0.5) 4px);"></span></span> SEMED: 0,49 ha</li>
+                                <li class="flex items-center gap-2"><span class="w-4 h-4 bg-yellow-400/50 border border-yellow-500 block relative overflow-hidden"><span class="absolute inset-0" style="background: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(234, 179, 8, 0.5) 2px, rgba(234, 179, 8, 0.5) 4px);"></span></span> Área de Invasão Consolidada: 0,20 ha</li>
+                                <li class="flex items-center gap-2"><span class="w-4 h-4 bg-red-500/50 border border-red-600 block relative overflow-hidden"><span class="absolute inset-0" style="background: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(239, 68, 68, 0.5) 2px, rgba(239, 68, 68, 0.5) 4px);"></span></span> SPU: 5,44 ha</li>
+                                <li class="flex items-center gap-2"><span class="w-4 h-4 bg-cyan-400/50 border border-cyan-500 block relative overflow-hidden"><span class="absolute inset-0" style="background: repeating-linear-gradient(45deg, transparent, transparent 2px, rgba(6, 182, 212, 0.5) 2px, rgba(6, 182, 212, 0.5) 4px);"></span></span> SEDUC: 1,64 ha</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 3. Item da Camada: Bacias Hidrográficas -->
+                    <div class="flex flex-col">
+                        <button id="btn-qgis-bacias" onclick="toggleCamadaQGIS('bacias', 'mapa_bacias.png')" class="w-full md:w-[60%] flex justify-between items-center p-3 bg-slate-700 hover:bg-slate-600 rounded-lg text-white font-medium border-2 border-transparent transition-all">
+                            <span class="flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-blue-500 hidden" id="status-bacias"></span>
+                                Bacias Hidrográficas e Drenagem
+                            </span>
+                            <span id="icone-bacias" class="text-xl">➕</span>
+                        </button>
+                        <div id="legenda-bacias" class="hidden w-full md:w-[60%] p-4 bg-slate-900 border-x border-b border-slate-700 rounded-b-lg mt-[-5px]">
+                            <h4 class="text-white font-bold text-sm mb-3">Limites das Bacias</h4>
+                            <ul class="text-xs text-slate-300 space-y-2">
+                                <li class="flex items-center gap-2"><span class="w-4 h-4 bg-[#fbdca7] border border-slate-400 block"></span> Bacia do Puraquequara</li>
+                                <li class="flex items-center gap-2"><span class="w-4 h-4 bg-[#a1d6fc] border border-slate-400 block"></span> Bacia Do Educandos</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <!-- Fim do Menu de Camadas -->
+
+            <!-- Container do Mapa -->
+            <div class="relative w-full h-[600px] rounded-2xl overflow-hidden shadow-2xl border border-dark-border group">
+                <div class="absolute inset-0 z-20 pointer-events-none rounded-2xl shadow-[inset_0_0_50px_rgba(0,0,0,0.8)]"></div>
+                <div id="map" class="w-full h-full relative z-10"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NOVA SEÇÃO: Galeria Dinâmica de Fotos (Inicia Oculta) -->
+    <section id="galeria-dinamica" class="w-full bg-slate-900 py-12 border-t border-slate-800 hidden">
+        <div class="max-w-6xl mx-auto px-4 md:px-6">
+            <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-3" id="galeria-titulo">
+                Registos Fotográficos
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="galeria-grid">
+                <!-- Fotos serão injetadas aqui via JavaScript -->
+            </div>
+        </div>
+    </section>
+    <!-- ========================================== -->
+    <!-- CAIXAS DE RECURSOS E LINKS                 -->
+    <!-- ========================================== -->
+    <section class="py-16 bg-slate-900 border-t border-slate-800">
+        <div class="max-w-6xl mx-auto px-4 md:px-6 text-center">
+            <h3 class="text-3xl font-bold text-white mb-2">Recursos do Projeto</h3>
+            <p class="text-slate-400 mb-10">Acesse a documentação completa e o acervo visual da pesquisa.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+                <!-- Caixa 1: Artigo Científico -->
+                <a href="#" class="group block bg-dark-card border border-dark-border rounded-2xl overflow-hidden hover:shadow-[0_0_20px_rgba(34,197,94,0.15)] transition-all">
+                    <div class="h-40 bg-slate-800 relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1456324504439-367cee3b3c32?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Artigo Científico" class="w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-opacity duration-500 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark-card to-transparent"></div>
+                    </div>
+                    <div class="p-6 relative -mt-6">
+                        <span class="inline-block p-2 bg-brand-dark rounded-lg mb-3 shadow-lg">
+                            <svg class="w-6 h-6 text-brand-light" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                        </span>
+                        <h4 class="text-xl font-bold text-white mb-2 group-hover:text-brand-light transition-colors">Artigo Científico</h4>
+                        <p class="text-slate-400 text-sm">Leia a publicação completa com a fundamentação teórica, análises do QGIS e resultados alcançados.</p>
+                    </div>
+                </a>
+
+                <!-- Caixa 2: Vitrine de Fotos -->
+               <!-- Caixa 2: Vitrine de Fotos -->
+<a href="vitrine.html" class="group block bg-dark-card border border-dark-border rounded-2xl overflow-hidden hover:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all">    <div class="h-40 bg-slate-800 relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Vitrine de Fotos" class="w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-opacity duration-500 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark-card to-transparent"></div>
+                    </div>
+                    <div class="p-6 relative -mt-6">
+                        <span class="inline-block p-2 bg-blue-900 rounded-lg mb-3 shadow-lg">
+                            <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        </span>
+                        <h4 class="text-xl font-bold text-white mb-2 group-hover:text-blue-400 transition-colors">Acervo Visual</h4>
+                        <p class="text-slate-400 text-sm">Acesse a galeria independente com todas as fotografias e evidências documentadas na pesquisa de campo.</p>
+                    </div>
+                </a>
+
+                <!-- Caixa 3: Metodologia e Dados -->
+                <a href="#" class="group block bg-dark-card border border-dark-border rounded-2xl overflow-hidden hover:shadow-[0_0_20px_rgba(168,85,247,0.15)] transition-all">
+                    <div class="h-40 bg-slate-800 relative overflow-hidden">
+                        <img src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Metodologia e Dados" class="w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-opacity duration-500 group-hover:scale-105">
+                        <div class="absolute inset-0 bg-gradient-to-t from-dark-card to-transparent"></div>
+                    </div>
+                    <div class="p-6 relative -mt-6">
+                        <span class="inline-block p-2 bg-purple-900 rounded-lg mb-3 shadow-lg">
+                            <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        </span>
+                        <h4 class="text-xl font-bold text-white mb-2 group-hover:text-purple-400 transition-colors">Metodologia e Dados</h4>
+                        <p class="text-slate-400 text-sm">Explore o processo técnico do WebGIS, a análise de geoprocessamento e os dados abertos do projeto.</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- EQUIPE DO PROJETO                          -->
+    <!-- ========================================== -->
+    <section class="py-16 bg-dark-bg border-t border-dark-border">
+        <div class="max-w-4xl mx-auto px-4 md:px-6">
+            <h3 class="text-2xl font-bold text-white mb-10 text-center">Equipe de Pesquisa</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Perfil do Pesquisador -->
+                <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 bg-dark-card p-6 rounded-2xl border border-dark-border hover:border-brand-light/50 transition-colors">
+                    <img src="https://ui-avatars.com/api/?name=João+Victor&background=22c55e&color=fff&size=120" alt="João Victor" class="w-20 h-20 rounded-full border-2 border-brand-light shadow-lg shrink-0">
+                    <div class="text-center sm:text-left">
+                        <h4 class="text-lg font-bold text-white leading-tight">João Victor da Silva Vasconcelos</h4>
+                        <p class="text-brand-light text-xs font-bold uppercase tracking-widest mt-1 mb-2">Pesquisador PIBIC-Af</p>
+                        <p class="text-slate-400 text-sm leading-relaxed">Graduando em Engenharia de Software no IFAM Campus Manaus Zona Leste. Responsável pelo desenvolvimento da plataforma interativa e mapeamento de campo.</p>
+                    </div>
+                </div>
+
+                <!-- Perfil da Orientadora -->
+                <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 bg-dark-card p-6 rounded-2xl border border-dark-border hover:border-blue-400/50 transition-colors">
+                    <img src="https://ui-avatars.com/api/?name=Alessandra+Fonseca&background=3b82f6&color=fff&size=120" alt="Profa. Alessandra" class="w-20 h-20 rounded-full border-2 border-blue-400 shadow-lg shrink-0">
+                    <div class="text-center sm:text-left">
+                        <h4 class="text-lg font-bold text-white leading-tight">Profa. Dra. Alessandra de Souza Fonseca</h4>
+                        <p class="text-blue-400 text-xs font-bold uppercase tracking-widest mt-1 mb-2">Orientadora</p>
+                        <p class="text-slate-400 text-sm leading-relaxed">Professora EBTT da área Florestal no IFAM CMZL. Coordenadora das pesquisas de intervenção ambiental e análise georreferenciada da vegetação do campus.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- FOOTER -->
+    <footer class="bg-[#0b1120] text-slate-500 py-10 border-t border-dark-border text-center">
+        <div class="max-w-4xl mx-auto px-4 flex flex-col items-center">
+            <svg class="w-10 h-10 text-brand-dark mb-4 opacity-50" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd"></path></svg>
+            <h3 class="text-slate-300 text-lg font-bold mb-1 tracking-wide">IFAM - CMZL</h3>
+            <p class="text-sm mb-4">Mapeamento Digital Interativo</p>
+            <p class="text-xs">&copy; 2026 Laboratório de Geoprocessamento Ambiental.</p>
+        </div>
+    </footer>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- Seu JS Separado -->
+    <script src="script.js"></script>
+</body>
+</html>

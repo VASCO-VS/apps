@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acervo Visual | IFAM CMZL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: { light: '#4ade80', DEFAULT: '#22c55e', dark: '#14532d' },
+                        dark: { bg: '#0f172a', card: '#1e293b', border: '#334155' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Regra extra para garantir que os "tijolos" não quebram a meio da coluna */
+        .masonry-item { break-inside: avoid; }
+    </style>
+</head>
+<body class="bg-dark-bg text-white antialiased min-h-screen flex flex-col">
+
+    <!-- Cabeçalho -->
+    <header class="border-b border-dark-border bg-dark-card sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
+                    <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Acervo Visual
+                </h1>
+                <p class="text-xs text-slate-400 mt-1">Galeria de fotografias - Projeto Conhecer para Proteger</p>
+            </div>
+            <a href="/" class="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-sm font-medium transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+                Voltar ao Mapa
+            </a>
+        </div>
+    </header>
+
+    <!-- Galeria Masonry (Tijolos Intercalados) -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-6 py-12">
+        <div id="loading" class="text-center text-slate-400 py-10">A carregar fotografias...</div>
+        
+        <!-- O Segredo: Uso de columns (colunas verticais) em vez de grid -->
+        <div id="grid-fotos" class="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 hidden w-full">
+            <!-- As fotos serão injetadas aqui pelo JavaScript -->
+        </div>
+        
+        <div id="mensagem-vazia" class="hidden text-center py-20 bg-dark-card rounded-2xl border border-dark-border">
+            <svg class="w-16 h-16 text-slate-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            <h3 class="text-xl font-bold text-white mb-2">Nenhuma foto encontrada</h3>
+            <p class="text-slate-400">Ainda não foram adicionados pontos com fotografias no painel administrativo.</p>
+        </div>
+    </main>
+
+    <script>
+        const nomesCategorias = {
+            'red-500': { nome: 'Acúmulo de Resíduos', cor: 'text-red-400 border-red-400/50' },
+            'green-500': { nome: 'Corte de Árvores', cor: 'text-green-400 border-green-400/50' },
+            'yellow-500': { nome: 'Solo Exposto', cor: 'text-yellow-400 border-yellow-400/50' },
+            'blue-500': { nome: 'Ocupações Irregulares', cor: 'text-blue-400 border-blue-400/50' },
+            'purple-500': { nome: 'Propostas de Intervenção', cor: 'text-purple-400 border-purple-400/50' }
+        };
+
+        async function carregarVitrine() {
+            try {
+                const response = await fetch('/api/pontos');
+                const pontos = await response.json();
+                
+                const grid = document.getElementById('grid-fotos');
+                const loading = document.getElementById('loading');
+                const vazia = document.getElementById('mensagem-vazia');
+
+                loading.classList.add('hidden');
+
+                const pontosComFoto = pontos.filter(p => p.imagem && p.imagem.trim() !== '');
+
+                if (pontosComFoto.length === 0) {
+                    vazia.classList.remove('hidden');
+                    return;
+                }
+
+                grid.classList.remove('hidden');
+
+                // Injeta as fotos com o layout Masonry
+                pontosComFoto.forEach(p => {
+                    const tagInfo = nomesCategorias[p.tipo] || { nome: 'Registo', cor: 'text-slate-300 border-slate-500' };
+                    
+                    grid.innerHTML += `
+                        <div class="masonry-item mb-6 bg-slate-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-brand-light/10 border border-slate-700/50 transition-all group relative cursor-pointer">
+                            
+                            <img src="${p.imagem}" alt="${p.titulo}" class="w-full h-auto object-cover group-hover:scale-105 transition-transform duration-700">
+                            
+                            <!-- ETIQUETA NO TOPO (Como pediu) -->
+                            <div class="absolute top-4 left-4 z-20">
+                                <span class="inline-block px-3 py-1.5 text-xs font-bold uppercase tracking-wider rounded-md bg-[#0f172a] border ${tagInfo.cor} shadow-lg backdrop-blur-md">
+                                    ${tagInfo.nome}
+                                </span>
+                            </div>
+                            
+                            <!-- Gradiente escuro base -->
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300 z-0"></div>
+                            
+                            <!-- Informações (Título e Descrição) na base -->
+                            <div class="absolute bottom-0 left-0 right-0 p-5 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 z-10">
+                                <h3 class="text-lg font-bold text-white leading-tight drop-shadow-md">${p.titulo}</h3>
+                                
+                                <p class="text-slate-300 text-xs mt-2 max-h-0 opacity-0 overflow-hidden group-hover:max-h-20 group-hover:opacity-100 transition-all duration-500 line-clamp-3">
+                                    ${p.descricao}
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                console.error("Erro ao carregar fotografias:", error);
+                document.getElementById('loading').innerText = "Erro ao conectar com o banco de dados.";
+            }
+        }
+
+        carregarVitrine();
+    </script>
+</body>
+</html>

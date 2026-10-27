@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - CMZL</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style> 
+        body { background-color: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; } 
+        #admin-map { height: 350px; width: 100%; border-radius: 0.5rem; z-index: 1; }
+        
+        /* Estilização da barra de rolagem para a lista de pontos */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    </style>
+</head>
+<body class="p-4 md:p-8 flex flex-col items-center min-h-screen">
+    <div class="w-full max-w-4xl flex justify-between items-center mb-8">
+        <h1 class="text-2xl md:text-3xl font-bold text-emerald-400">Painel Administrativo</h1>
+        <a href="/" class="text-sm bg-slate-800 hover:bg-slate-700 px-4 py-2 rounded-lg border border-slate-600 transition-colors">Voltar ao Mapa</a>
+    </div>
+
+    <!-- Secção de Login -->
+    <div id="loginSection" class="bg-slate-800 p-8 rounded-2xl border border-slate-700 w-full max-w-md shadow-2xl">
+        <h2 class="mb-6 text-xl font-semibold text-center">Acesso Restrito</h2>
+        <input type="password" id="senha" placeholder="Palavra-passe (ifam)" class="w-full p-3 mb-6 bg-slate-900 border border-slate-600 rounded-lg text-white focus:border-emerald-500 outline-none">
+        <button onclick="fazerLogin()" class="w-full bg-emerald-500 hover:bg-emerald-600 p-3 rounded-lg font-bold transition-colors shadow-lg shadow-emerald-500/20">Entrar no Sistema</button>
+    </div>
+
+    <!-- Secção Administrativa (Oculta até fazer login) -->
+    <div id="adminSection" class="hidden w-full max-w-5xl flex flex-col gap-8">
+        
+        <!-- Bloco Superior: Adicionar / Editar -->
+        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
+            <h2 id="formTitle" class="mb-6 text-xl font-bold text-emerald-400 border-b border-slate-700 pb-3">Adicionar Novo Ponto Crítico</h2>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Coluna 1: O Mapa Interativo -->
+                <div class="flex flex-col gap-2 relative">
+                    <p class="text-sm text-slate-400 mb-1">Arraste o marcador ou clique no mapa para definir o local exato.</p>
+                    <div id="admin-map" class="border-2 border-slate-600 shadow-inner"></div>
+                </div>
+
+                <!-- Coluna 2: O Formulário -->
+                <form id="formPonto" onsubmit="salvarPonto(event)" class="flex flex-col justify-between h-full">
+                    
+                    <!-- Campo Oculto para guardar o ID quando estamos a editar -->
+                    <input type="hidden" id="ponto_id" value="">
+                    
+                    <div class="space-y-4">
+                        <input type="text" id="titulo" placeholder="Título da Ocorrência" required class="w-full p-3 bg-slate-900 border border-slate-600 rounded-lg text-sm focus:border-emerald-500 outline-none text-white">
+                        
+                        <textarea id="descricao" placeholder="Descrição do impacto ambiental..." required class="w-full p-3 bg-slate-900 border border-slate-600 rounded-lg text-sm h-24 focus:border-emerald-500 outline-none text-white resize-none"></textarea>
+                        
+                        <select id="tipo" class="w-full p-3 bg-slate-900 border border-slate-600 rounded-lg text-sm text-white focus:border-emerald-500 outline-none">
+                            <option value="red-500">Descarte de Lixo (Vermelho)</option>
+                            <option value="green-500">Corte de Árvores (Verde)</option>
+                            <option value="yellow-500">Áreas de Solo Exposto (Amarelo)</option>
+                            <option value="blue-500">Ocupações Irregulares (Azul)</option>
+                            <option value="purple-500">Propostas de Intervenções (Lilás)</option>
+                            <!-- NOVAS OPÇÕES -->
+                            <option value="teal-500">APPs (Verde-Azulado)</option>
+                            <option value="orange-500">Sítio Arqueológico (Laranja)</option>
+                        </select>
+
+                        <!-- Upload de Imagem -->
+                        <div class="bg-slate-900 border border-slate-600 rounded-lg p-2 flex flex-col gap-1">
+                            <span class="text-xs text-slate-400 ml-2">Foto (opcional na edição)</span>
+                            <input type="file" id="imagem_file" accept="image/*" class="w-full text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-slate-700 file:text-white hover:file:bg-slate-600 cursor-pointer outline-none">
+                        </div>
+
+                        <div class="flex gap-4">
+                            <input type="text" id="lat" placeholder="Latitude" readonly class="w-1/2 p-3 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-500 cursor-not-allowed">
+                            <input type="text" id="lng" placeholder="Longitude" readonly class="w-1/2 p-3 bg-slate-950 border border-slate-800 rounded-lg text-sm text-slate-500 cursor-not-allowed">
+                        </div>
+                    </div>
+
+                    <!-- Botões de Ação -->
+                    <div class="flex gap-3 mt-6">
+                        <button type="button" id="btnCancelar" onclick="cancelarEdicao()" class="hidden w-1/3 bg-slate-700 hover:bg-slate-600 p-3 rounded-lg font-bold text-white transition-colors">
+                            Cancelar
+                        </button>
+                        <button type="submit" id="btnSalvar" class="flex-1 bg-emerald-500 hover:bg-emerald-600 p-3 rounded-lg font-bold text-white shadow-[0_0_15px_rgba(16,185,129,0.2)] transition-all">
+                            Guardar Ponto
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Bloco Inferior: Lista de Pontos Registados -->
+        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl">
+            <h3 class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path></svg>
+                Gestão do Acervo (Pontos Registados)
+            </h3>
+            
+            <div id="lista-loading" class="text-slate-400 text-sm py-4">A carregar banco de dados...</div>
+            
+            <div id="lista-pontos" class="flex flex-col gap-3 max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
+                <!-- Os pontos serão gerados aqui pelo JS -->
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let adminMap;
+        let pinoArrastavel;
+        let listaDadosGlobal = []; // Guarda os pontos para não ter de pesquisar no servidor ao editar
+
+        const nomesCategorias = {
+            'red-500': { nome: 'Lixo', cor: 'text-red-400 bg-red-400/10 border-red-400/20' },
+            'green-500': { nome: 'Árvores', cor: 'text-green-400 bg-green-400/10 border-green-400/20' },
+            'yellow-500': { nome: 'Solo Exposto', cor: 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20' },
+            'blue-500': { nome: 'Ocupação', cor: 'text-blue-400 bg-blue-400/10 border-blue-400/20' },
+            'purple-500': { nome: 'Intervenção', cor: 'text-purple-400 bg-purple-400/10 border-purple-400/20' }
+        };
+
+        // ==========================================
+        // 1. INICIALIZAÇÃO E LOGIN
+        // ==========================================
+        function fazerLogin() {
+            if(document.getElementById('senha').value === 'ifam') {
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('adminSection').classList.remove('hidden');
+                document.getElementById('adminSection').classList.add('flex');
+                
+                setTimeout(() => { 
+                    inicializarMapaAdmin(); 
+                    carregarLista(); // Carrega a tabela mal faz o login
+                }, 200);
+            } else {
+                alert('Palavra-passe incorreta!');
+            }
+        }
+
+        function inicializarMapaAdmin() {
+            if (adminMap) return;
+            const centerLat = -3.0835;
+            const centerLng = -59.9321;
+            adminMap = L.map('admin-map').setView([centerLat, centerLng], 15);
+            L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', { maxZoom: 20 }).addTo(adminMap);
+            pinoArrastavel = L.marker([centerLat, centerLng], { draggable: true }).addTo(adminMap);
+            atualizarInputs(centerLat, centerLng);
+            
+            pinoArrastavel.on('dragend', function() {
+                const posicao = pinoArrastavel.getLatLng();
+                atualizarInputs(posicao.lat, posicao.lng);
+            });
+            
+            adminMap.on('click', function(event) {
+                pinoArrastavel.setLatLng(event.latlng);
+                atualizarInputs(event.latlng.lat, event.latlng.lng);
+            });
+        }
+
+        function atualizarInputs(lat, lng) {
+            document.getElementById('lat').value = lat.toFixed(6);
+            document.getElementById('lng').value = lng.toFixed(6);
+        }
+
+        // ==========================================
+        // 2. GESTÃO DA LISTA (Ler, Excluir, Preparar Edição)
+        // ==========================================
+        async function carregarLista() {
+            try {
+                const response = await fetch('/api/pontos');
+                listaDadosGlobal = await response.json();
+                
+                document.getElementById('lista-loading').classList.add('hidden');
+                const container = document.getElementById('lista-pontos');
+                container.innerHTML = '';
+
+                if(listaDadosGlobal.length === 0) {
+                    container.innerHTML = '<div class="text-slate-500 text-sm italic py-4">Nenhum ponto registado no banco de dados.</div>';
+                    return;
+                }
+
+                // Inverte a lista para os mais recentes (últimos criados) aparecerem no topo
+                listaDadosGlobal.slice().reverse().forEach(p => {
+                    const cat = nomesCategorias[p.tipo] || { nome: 'Registo', cor: 'text-slate-400 bg-slate-800 border-slate-600' };
+                    const hasImage = p.imagem && p.imagem.trim() !== '' 
+                        ? '<svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>' 
+                        : '<svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>';
+
+                    container.innerHTML += `
+                        <div class="bg-slate-900/50 border border-slate-700/60 rounded-xl p-4 flex flex-col md:flex-row justify-between md:items-center gap-4 hover:border-slate-500 transition-colors">
+                            <div class="flex flex-col gap-1 overflow-hidden">
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded border ${cat.cor}">${cat.nome}</span>
+                                    <h4 class="font-bold text-white truncate" title="${p.titulo}">${p.titulo}</h4>
+                                </div>
+                                <div class="flex items-center gap-2 text-xs text-slate-400">
+                                    <span title="ID do Registo">#${p.id}</span> • 
+                                    <span class="flex items-center gap-1">${hasImage} Foto</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex gap-2">
+                                <button onclick="prepararEdicao(${p.id})" class="flex-1 md:flex-none px-4 py-2 bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white border border-blue-500/30 rounded-lg text-sm font-medium transition-all">
+                                    Editar
+                                </button>
+                                <button onclick="excluirPonto(${p.id})" class="flex-1 md:flex-none px-4 py-2 bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white border border-red-500/30 rounded-lg text-sm font-medium transition-all">
+                                    Excluir
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                console.error("Erro ao carregar lista:", error);
+                document.getElementById('lista-loading').innerText = "Erro ao conectar ao servidor Python.";
+            }
+        }
+
+        async function excluirPonto(id) {
+            if(!confirm("CUIDADO: Tem a certeza que deseja excluir este ponto e a sua foto permanentemente?")) return;
+            
+            try {
+                const response = await fetch(`/api/pontos/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    carregarLista(); // Atualiza a tabela
+                    
+                    // Se estava a editar exatamente este ponto, cancela a edição
+                    if(document.getElementById('ponto_id').value == id) {
+                        cancelarEdicao();
+                    }
+                } else {
+                    alert("Erro ao excluir o ponto no servidor.");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Erro de comunicação com o servidor.");
+            }
+        }
+
+        function prepararEdicao(id) {
+            const ponto = listaDadosGlobal.find(p => p.id === id);
+            if(!ponto) return;
+
+            // Preenche o formulário
+            document.getElementById('ponto_id').value = ponto.id;
+            document.getElementById('titulo').value = ponto.titulo;
+            document.getElementById('descricao').value = ponto.descricao;
+            document.getElementById('tipo').value = ponto.tipo;
+            document.getElementById('lat').value = ponto.lat;
+            document.getElementById('lng').value = ponto.lng;
+            document.getElementById('imagem_file').value = ''; // Limpa seleção de ficheiro
+            
+            // Move o pino e a câmara no mapa
+            pinoArrastavel.setLatLng([ponto.lat, ponto.lng]);
+            adminMap.setView([ponto.lat, ponto.lng], 17);
+
+            // Altera os aspetos visuais
+            document.getElementById('formTitle').innerHTML = `<span class="text-blue-400">Modo de Edição</span> <span class="text-sm text-slate-400 ml-2 font-normal">(Registo #${ponto.id})</span>`;
+            
+            const btnSalvar = document.getElementById('btnSalvar');
+            btnSalvar.innerText = "Atualizar Ponto";
+            btnSalvar.className = "flex-1 bg-blue-500 hover:bg-blue-600 p-3 rounded-lg font-bold text-white shadow-[0_0_15px_rgba(59,130,246,0.2)] transition-all";
+            
+            document.getElementById('btnCancelar').classList.remove('hidden');
+            
+            // Rola suavemente a página para o topo do formulário
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function cancelarEdicao() {
+            document.getElementById('ponto_id').value = '';
+            document.getElementById('formPonto').reset();
+            
+            // Restaura o visual para "Adicionar"
+            document.getElementById('formTitle').innerText = "Adicionar Novo Ponto Crítico";
+            
+            const btnSalvar = document.getElementById('btnSalvar');
+            btnSalvar.innerText = "Guardar Ponto";
+            btnSalvar.className = "flex-1 bg-emerald-500 hover:bg-emerald-600 p-3 rounded-lg font-bold text-white shadow-[0_0_15px_rgba(16,185,129,0.2)] transition-all";
+            
+            document.getElementById('btnCancelar').classList.add('hidden');
+            
+            // Reposiciona o pino no centro original
+            const centerLat = -3.0835; const centerLng = -59.9321;
+            pinoArrastavel.setLatLng([centerLat, centerLng]);
+            adminMap.setView([centerLat, centerLng], 15);
+            atualizarInputs(centerLat, centerLng);
+        }
+
+        // ==========================================
+        // 3. ENVIO DOS DADOS (CRIAR OU ATUALIZAR)
+        // ==========================================
+        async function salvarPonto(e) {
+            e.preventDefault();
+            
+            const idEdicao = document.getElementById('ponto_id').value;
+            const modoEdicao = idEdicao !== ''; // Se o ID não está vazio, é edição (PUT)
+            
+            const url = modoEdicao ? `/api/pontos/${idEdicao}` : '/api/pontos';
+            const metodo = modoEdicao ? 'PUT' : 'POST';
+
+            const formData = new FormData();
+            formData.append('titulo', document.getElementById('titulo').value);
+            formData.append('descricao', document.getElementById('descricao').value);
+            formData.append('tipo', document.getElementById('tipo').value);
+            formData.append('lat', document.getElementById('lat').value);
+            formData.append('lng', document.getElementById('lng').value);
+
+            const fileInput = document.getElementById('imagem_file');
+            if (fileInput.files.length > 0) {
+                formData.append('imagem', fileInput.files[0]);
+            }
+
+            try {
+                // Altera o texto do botão para dar feedback visual
+                const btn = document.getElementById('btnSalvar');
+                const textoOriginal = btn.innerText;
+                btn.innerText = "A processar...";
+                btn.disabled = true;
+
+                const response = await fetch(url, {
+                    method: metodo,
+                    body: formData
+                });
+
+                if (response.ok) {
+                    cancelarEdicao(); // Limpa e reseta o formulário
+                    carregarLista();  // Atualiza a tabela
+                    
+                    // Aviso visual elegante (pode trocar por alert se preferir)
+                    alert(modoEdicao ? 'Registo atualizado com sucesso!' : 'Novo ponto adicionado com sucesso!');
+                } else {
+                    alert('Erro no servidor ao tentar processar o pedido.');
+                }
+                
+                btn.innerText = textoOriginal;
+                btn.disabled = false;
+                
+            } catch (error) {
+                console.error(error);
+                alert('Erro de comunicação. O servidor Python está a correr?');
+                document.getElementById('btnSalvar').disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
